@@ -26,14 +26,19 @@ abstract class Query<InstanceType extends ManagedObject> {
   /// For insert or update queries, you may provide [values] through this constructor
   /// or set the field of the same name later. If set in the constructor,
   /// [InstanceType] is inferred.
-  factory Query(ManagedContext context, {InstanceType values}) {
+  factory Query(ManagedContext context, {InstanceType values, String schema}) {
     final entity = context.dataModel.entityForType(InstanceType);
     if (entity == null) {
       throw ArgumentError(
           "Invalid context. The data model of 'context' does not contain '$InstanceType'.");
     }
 
-    return context.persistentStore.newQuery<InstanceType>(context, entity, values: values);
+    return context.persistentStore.newQuery<InstanceType>(
+      context,
+      entity,
+      values: values,
+      schema: schema,
+    );
   }
 
   /// Creates a new [Query] without a static type.
@@ -42,13 +47,21 @@ abstract class Query<InstanceType extends ManagedObject> {
   /// where the static type argument cannot be defined. Behaves just like the unnamed constructor.
   ///
   /// If [entity] is not in [context]'s [ManagedContext.dataModel], throws a internal failure [QueryException].
-  factory Query.forEntity(ManagedEntity entity, ManagedContext context) {
+  factory Query.forEntity(
+    ManagedEntity entity,
+    ManagedContext context, {
+    String schema,
+  }) {
     if (!context.dataModel.entities.any((e) => identical(entity, e))) {
       throw StateError(
           "Invalid query construction. Entity for '${entity.tableName}' is from different context than specified for query.");
     }
 
-    return context.persistentStore.newQuery<InstanceType>(context, entity);
+    return context.persistentStore.newQuery<InstanceType>(
+      context,
+      entity,
+      schema: schema,
+    );
   }
 
   /// Inserts a single [object] into the database managed by [context].
@@ -356,6 +369,9 @@ abstract class Query<InstanceType extends ManagedObject> {
   ///           ..where.id = whereEqualTo(1);
   ///       var deletedCount = await q.delete();
   Future<int> delete();
+
+  ///
+  String schema;
 }
 
 /// Order value for [Query.pageBy] and [Query.sortBy].

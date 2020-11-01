@@ -8,10 +8,15 @@ import 'query_builder.dart';
 class PostgresQuery<InstanceType extends ManagedObject> extends Object
     with QueryMixin<InstanceType>
     implements Query<InstanceType> {
-  PostgresQuery(this.context);
+  // PostgresQuery(this.context);
 
-  PostgresQuery.withEntity(this.context, ManagedEntity entity) {
+  PostgresQuery.withEntity(
+    this.context,
+    ManagedEntity entity, {
+    String schema,
+  }) {
     _entity = entity;
+    this.schema = schema;
   }
 
   @override
@@ -51,7 +56,9 @@ class PostgresQuery<InstanceType extends ManagedObject> extends Object
     final results = await context.persistentStore
         .executeQuery(buffer.toString(), builder.variables, timeoutInSeconds);
 
-    return builder.instancesForRows<InstanceType>(results as List<List<dynamic>>).first;
+    return builder
+        .instancesForRows<InstanceType>(results as List<List<dynamic>>)
+        .first;
   }
 
   @override

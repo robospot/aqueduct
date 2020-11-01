@@ -14,7 +14,8 @@ import 'package:aqueduct/src/db/query/query.dart';
 class TableBuilder implements Returnable {
   TableBuilder(PostgresQuery query, {this.parent, this.joinedBy})
       : entity = query.entity,
-        _manualPredicate = query.predicate {
+        _manualPredicate = query.predicate,
+        _schema = query.schema {
     if (parent != null) {
       tableAlias = createTableAlias();
     }
@@ -50,6 +51,7 @@ class TableBuilder implements Returnable {
 
   TableBuilder.implicit(this.parent, this.joinedBy)
       : entity = joinedBy.inverse.entity,
+        _schema = parent._schema,
         _manualPredicate = QueryPredicate.empty() {
     tableAlias = createTableAlias();
     returning = <Returnable>[];
@@ -67,6 +69,8 @@ class TableBuilder implements Returnable {
   int aliasCounter = 0;
 
   final QueryPredicate _manualPredicate;
+
+  final String _schema;
 
   ManagedRelationshipDescription get foreignKeyProperty =>
       joinedBy.relationshipType == ManagedRelationshipType.belongsTo
@@ -236,11 +240,15 @@ class TableBuilder implements Returnable {
    */
 
   String get sqlTableName {
-    if (tableAlias == null) {
-      return entity.tableName;
+    final buffer = StringBuffer();
+    if (_schema != null && _schema != "") {
+      buffer.write("$_schema.");
     }
-
-    return "${entity.tableName} $tableAlias";
+    buffer.write(entity.tableName);
+    if (tableAlias != null) {
+      buffer.write(" $tableAlias");
+    }
+    return buffer.toString();
   }
 
   String get sqlTableReference => tableAlias ?? entity.tableName;

@@ -95,12 +95,12 @@ class PostgreSQLPersistentStore extends PersistentStore
   PostgreSQLConnection _databaseConnection;
   Completer<PostgreSQLConnection> _pendingConnectionCompleter;
 
-
   /// Retrieves the query execution context of this store.
   ///
   /// Use this property to execute raw queries on the underlying database connection.
   /// If running a transaction, this context is the transaction context.
-  Future<PostgreSQLExecutionContext> get executionContext => getDatabaseConnection();
+  Future<PostgreSQLExecutionContext> get executionContext =>
+      getDatabaseConnection();
 
   /// Retrieves a connection to the database this instance connects to.
   ///
@@ -134,9 +134,12 @@ class PostgreSQLPersistentStore extends PersistentStore
 
   @override
   Query<T> newQuery<T extends ManagedObject>(
-      ManagedContext context, ManagedEntity entity,
-      {T values}) {
-    final query = PostgresQuery<T>.withEntity(context, entity);
+    ManagedContext context,
+    ManagedEntity entity, {
+    T values,
+    String schema,
+  }) {
+    final query = PostgresQuery<T>.withEntity(context, entity, schema: schema);
     if (values != null) {
       query.values = values;
     }

@@ -116,6 +116,9 @@ abstract class QueryMixin<InstanceType extends ManagedObject>
     _propertiesToFetch = entity.identifyProperties(propertyIdentifiers);
   }
 
+  @override
+  String schema;
+
   void validateInput(Validating op) {
     if (valueMap == null) {
       if (op == Validating.insert) {
