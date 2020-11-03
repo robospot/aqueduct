@@ -79,11 +79,14 @@ abstract class QueryMixin<InstanceType extends ManagedObject>
   }
 
   @override
-  Query<T> join<T extends ManagedObject>(
-      {T object(InstanceType x), ManagedSet<T> set(InstanceType x)}) {
+  Query<T> join<T extends ManagedObject>({
+    T object(InstanceType x),
+    ManagedSet<T> set(InstanceType x),
+    String schema,
+  }) {
     final desc = entity.identifyRelationship(object ?? set);
 
-    return _createSubquery<T>(desc);
+    return _createSubquery<T>(desc, schema: schema);
   }
 
   @override
@@ -135,7 +138,9 @@ abstract class QueryMixin<InstanceType extends ManagedObject>
   }
 
   Query<T> _createSubquery<T extends ManagedObject>(
-      ManagedRelationshipDescription fromRelationship) {
+    ManagedRelationshipDescription fromRelationship, {
+    String schema,
+  }) {
     if (subQueries?.containsKey(fromRelationship) ?? false) {
       throw StateError(
           "Invalid query. Cannot join same property more than once.");
@@ -164,7 +169,7 @@ abstract class QueryMixin<InstanceType extends ManagedObject>
 
     subQueries ??= {};
 
-    var subquery = Query<T>(context);
+    var subquery = Query<T>(context, schema: schema ?? this.schema);
     (subquery as QueryMixin)._parentQuery = this;
     subQueries[fromRelationship] = subquery;
 

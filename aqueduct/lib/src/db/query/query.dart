@@ -26,7 +26,11 @@ abstract class Query<InstanceType extends ManagedObject> {
   /// For insert or update queries, you may provide [values] through this constructor
   /// or set the field of the same name later. If set in the constructor,
   /// [InstanceType] is inferred.
-  factory Query(ManagedContext context, {InstanceType values, String schema}) {
+  factory Query(
+    ManagedContext context, {
+    InstanceType values,
+    String schema = defaultSchema,
+  }) {
     final entity = context.dataModel.entityForType(InstanceType);
     if (entity == null) {
       throw ArgumentError(
@@ -50,7 +54,7 @@ abstract class Query<InstanceType extends ManagedObject> {
   factory Query.forEntity(
     ManagedEntity entity,
     ManagedContext context, {
-    String schema,
+    String schema = defaultSchema,
   }) {
     if (!context.dataModel.entities.any((e) => identical(entity, e))) {
       throw StateError(
@@ -120,9 +124,12 @@ abstract class Query<InstanceType extends ManagedObject> {
   ///         var subquery = query.join(set: (u) => u.notes)
   ///           ..where.dateCreatedAt = whereGreaterThan(someDate);
   ///
-  /// This mechanism only works on [fetch] and [fetchOne] execution methods. You *must not* execute a subquery created by this method.
-  Query<T> join<T extends ManagedObject>(
-      {T object(InstanceType x), ManagedSet<T> set(InstanceType x)});
+  /// This mechanismdefaultSchemanly works on [fetch] and [fetchOne] execution methods. You *must not* execute a subquery created by this method.
+  Query<T> join<T extends ManagedObject>({
+    T object(InstanceType x),
+    ManagedSet<T> set(InstanceType x),
+    String schema,
+  });
 
   /// Configures this instance to fetch a section of a larger result set.
   ///
@@ -373,6 +380,8 @@ abstract class Query<InstanceType extends ManagedObject> {
   ///
   String schema;
 }
+
+const String defaultSchema = '';
 
 /// Order value for [Query.pageBy] and [Query.sortBy].
 enum QuerySortOrder {
